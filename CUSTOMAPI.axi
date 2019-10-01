@@ -1,6 +1,6 @@
 PROGRAM_NAME='CUSTOMAPI'
 (***********************************************************)
-(*  FILE_LAST_MODIFIED_ON: 09/11/2019  AT: 09:38:36        *)
+(*  FILE_LAST_MODIFIED_ON: 09/27/2019  AT: 23:35:53        *)
 (***********************************************************)
 
 #IF_NOT_DEFINED __CUSTOMAPI__
@@ -51,8 +51,141 @@ DEFINE_CONSTANT
 
    integer _CAM_HOME = 181
    integer _PANTILT_STOP = 0
+   
+   // MD5
+    long lr[64] = {7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
+		   5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,
+		   4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,
+		   6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21}
+
+    long lk[64]={3614090360, 3905402710, 606105819,  3250441966, 4118548399, 1200080426, 2821735955, 4249261313,
+		 1770035416, 2336552879, 4294925233, 2304563134, 1804603682, 4254626195, 2792965006, 1236535329,
+		 4129170786, 3225465664, 643717713,  3921069994, 3593408605, 38016083,   3634488961, 3889429448,
+		 568446438,  3275163606, 4107603335, 1163531501, 2850285829, 4243563512, 1735328473, 2368359562,
+		 4294588738, 2272392833, 1839030562, 4259657740, 2763975236, 1272893353, 4139469664, 3200236656,
+		 681279174,  3936430074, 3572445317, 76029189,   3654602809, 3873151461, 530742520,  3299628645,
+		 4096336452, 1126891415, 2878612391, 4237533241, 1700485571, 2399980690, 4293915773, 2240044497,
+		 1873313359, 4264355552, 2734768916, 1309151649, 4149444226, 3174756917, 718787259,  3951481745}
 
 DEFINE_VARIABLE
+
+    volatile char cText2[256]
+
+DEFINE_START
+
+    define_function long leftrotate(LONG lx, LONG ly)
+    {
+	local_var long lRotate
+	lRotate=(lx << ly) BOR (lx >> (32-ly))
+	return lRotate
+    }
+
+    define_function MD5(CHAR cInputstring[256], CHAR cResult[32])
+    {
+	local_var long lh0
+	local_var long lh1
+	local_var long lh2
+	local_var long lh3
+	
+	local_var long la
+	local_var long lb
+	local_var long lc
+	local_var long ld
+	
+	local_var integer nMessageLength 
+	
+	cText2 = cInputstring
+	
+	lh0 = $67452301
+	lh1 = $EFCDAB89
+	lh2 = $98BADCFE
+	lh3 = $10325476
+	
+	la = lh0
+	lb = lh1
+	lc = lh2
+	ld = lh3
+	
+	nMessageLength = length_string(cText2)*8	// Determinamos la lontigud del mensaje
+	cText2 = "cText2,$80"				// Añadir 1 Bit (10000000)
+	
+	while((length_string(cText2)%64)<>56)		// 0 Bits de relleno hasta 8 bytes de duración
+	{
+	    cText2="cText2,$00"
+	}
+	
+	cText2="cText2,nMessageLength%256,nMessageLength/256,$00,$00,$00,$00,$00,$00"	// add message Length in little Endian
+	
+	while(length_string(cText2))
+	{
+	    local_var integer i
+	    local_var char cText3[64]			// 512 Bit Blocks
+	    local_var char cText4[16][4]		// 16 32 Bit Blocks
+	    local_var long lText4[16]			// 16 32 Bit Blocks
+	    
+	    local_var long lf
+	    local_var long lg
+	    local_var long ltemp
+	    
+	    cText3 = get_buffer_string(cText2,64)
+	    
+	    for(i=1;i<=16;i++)
+	    {
+		cText4[i] = get_buffer_string(cText3,4)
+		lText4[i] = (cText4[i][1])+(cText4[i][2]*256)+(cText4[i][3]*65536)+(cText4[i][4]*16777216)
+	    }
+	    
+	    for(i=0;i<=63;i++)
+	    {
+		select
+		{
+		    active(i<=15):
+		    {
+			lf=(lb BAND lc) BOR ((BNOT lb) BAND ld)
+			lg=i
+		    }
+		    active(i<=31):
+		    {
+			lf=(ld BAND lb) BOR ((BNOT ld) BAND lc)
+			lg=(5*i+1)%16
+		    }
+		    active(i<=47):
+		    {
+			lf=lb BXOR lc BXOR ld
+			lg=(3*i+5)%16
+		    }
+		    active(i<=63):
+		    {
+			lf=lc BXOR (lb BOR (BNOT ld))
+			lg=(7*i)%16
+		    }
+		}
+		
+		ltemp = ld
+		ld = lc
+		lc = lb
+		lb = lb + leftrotate((la+lf+lk[i+1]+lText4[lg+1]),lr[i+1])
+		la = ltemp
+	    }
+	    
+	    lh0 = lh0 + la
+	    lh1 = lh1 + lb
+	    lh2 = lh2 + lc
+	    lh3 = lh3 + ld
+	}
+	
+	cResult = "format('%02x',lh0%256),format('%02x',(lh0/256)%256),format('%02x',(lh0/65536)%256),format('%02x',lh0/16777216),
+		   format('%02x',lh1%256),format('%02x',(lh1/256)%256),format('%02x',(lh1/65536)%256),format('%02x',lh1/16777216),
+		   format('%02x',lh2%256),format('%02x',(lh2/256)%256),format('%02x',(lh2/65536)%256),format('%02x',lh2/16777216),
+		   format('%02x',lh3%256),format('%02x',(lh3/256)%256),format('%02x',(lh3/65536)%256),format('%02x',lh3/16777216)"
+    }
+
+    define_function char[32] fnDeviceToString(dev dvDev)
+    {
+	stack_var char sDevice[32]
+	sDevice = "itoa(dvDev.NUMBER),':',itoa(dvDev.PORT),':',itoa(dvDev.SYSTEM)"
+	
+    }
 
     define_function fnInfo(char sInfo[])
     {
@@ -66,7 +199,7 @@ DEFINE_VARIABLE
 	amx_log(AMX_DEBUG,"__file__,': ',sDebug")
     }
 
-    define_function fnDebugHex(char sDebug[])
+    define_function fnDebugIntoHex(char sDebug[])
     {
 	stack_var integer i
 	stack_var char sDebugAux[255]
