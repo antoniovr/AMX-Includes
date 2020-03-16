@@ -1,6 +1,6 @@
 PROGRAM_NAME='CUSTOMAPI'
 (***********************************************************)
-(*  FILE_LAST_MODIFIED_ON: 09/27/2019  AT: 23:35:53        *)
+(*  FILE_LAST_MODIFIED_ON: 02/01/2020  AT: 21:04:55        *)
 (***********************************************************)
 
 #IF_NOT_DEFINED __CUSTOMAPI__
@@ -50,7 +50,7 @@ DEFINE_CONSTANT
    integer _FOCUS_MANUAL = 5
 
    integer _CAM_HOME = 181
-   integer _PANTILT_STOP = 0
+   integer _PANTILT_STOP = 222
    
    // MD5
     long lr[64] = {7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
