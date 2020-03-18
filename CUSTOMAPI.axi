@@ -1,6 +1,6 @@
 PROGRAM_NAME='CUSTOMAPI'
 (***********************************************************)
-(*  FILE_LAST_MODIFIED_ON: 02/01/2020  AT: 21:04:55        *)
+(*  FILE_LAST_MODIFIED_ON: 03/17/2020  AT: 16:09:59        *)
 (***********************************************************)
 
 #IF_NOT_DEFINED __CUSTOMAPI__
@@ -12,6 +12,9 @@ DEFINE_CONSTANT
     char _CR = $0D
     char _LF = $0A
 
+    integer _LEVEL_ALL   = 1
+    integer _LEVEL_VIDEO = 2
+    integer _LEVEL_AUDIO = 3
     integer _STATE_ALL = 0
     integer _STATE_OFF = 1
     integer _STATE_ON  = 2
@@ -72,6 +75,26 @@ DEFINE_VARIABLE
     volatile char cText2[256]
 
 DEFINE_START
+
+    define_function fnModuleSetDebug(dev vdvDevice,integer nDebug)
+    {
+	send_command vdvDevice,"'DEBUG-',itoa(nDebug)"
+    }
+
+    define_function fnModuleSetIP(dev vdvDevice,char sIP[])
+    {
+	send_command vdvDevice,"'PROPERTY-IP_Address,',sIP"
+    }
+    
+    define_function fnModuleSetPort(dev vdvDevice,long nPort)
+    {
+	send_command vdvDevice,"'PROPERTY-Port,',itoa(nPort)"
+    }
+    
+    define_function fnModuleReinit(dev vdvDevice)
+    {
+	send_command vdvDevice,"'REINIT'"
+    }
 
     define_function long leftrotate(LONG lx, LONG ly)
     {
