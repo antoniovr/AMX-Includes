@@ -1,6 +1,6 @@
 PROGRAM_NAME='CUSTOMAPI'
 (***********************************************************)
-(*  FILE_LAST_MODIFIED_ON: 03/17/2020  AT: 16:09:59        *)
+(*  FILE_LAST_MODIFIED_ON: 08/20/2020  AT: 11:29:40        *)
 (***********************************************************)
 
 #IF_NOT_DEFINED __CUSTOMAPI__
@@ -75,6 +75,11 @@ DEFINE_VARIABLE
     volatile char cText2[256]
 
 DEFINE_START
+
+    define_function fnKeyboardOpen(char sPrompt[],char sTitle[],char sHint[],char sHeader[])
+    {
+	send_command dvTp,"'AKEYB-',sPrompt,';',sTitle,';',sHint,';',sHeader,'-;1'"
+    }
 
     define_function fnModuleSetDebug(dev vdvDevice,integer nDebug)
     {
