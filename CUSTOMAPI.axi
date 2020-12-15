@@ -76,355 +76,355 @@ DEFINE_VARIABLE
 
 DEFINE_START
 
-    define_function fnKeyboardOpen(char sPrompt[],char sTitle[],char sHint[],char sHeader[])
+    define_function fnKeyboardOpen(dev dvTp,char sPrompt[],char sTitle[],char sHint[],char sHeader[])
     {
-	send_command dvTp,"'AKEYB-',sPrompt,';',sTitle,';',sHint,';',sHeader,'-;1'"
+    	send_command dvTp,"'AKEYB-',sPrompt,';',sTitle,';',sHint,';',sHeader,'-;1'"
     }
 
     define_function fnModuleSetDebug(dev vdvDevice,integer nDebug)
     {
-	send_command vdvDevice,"'DEBUG-',itoa(nDebug)"
+        send_command vdvDevice,"'DEBUG-',itoa(nDebug)"
     }
 
     define_function fnModuleSetIP(dev vdvDevice,char sIP[])
     {
-	send_command vdvDevice,"'PROPERTY-IP_Address,',sIP"
+	    send_command vdvDevice,"'PROPERTY-IP_Address,',sIP"
     }
     
     define_function fnModuleSetPort(dev vdvDevice,long nPort)
     {
-	send_command vdvDevice,"'PROPERTY-Port,',itoa(nPort)"
+	    send_command vdvDevice,"'PROPERTY-Port,',itoa(nPort)"
     }
     
     define_function fnModuleReinit(dev vdvDevice)
     {
-	send_command vdvDevice,"'REINIT'"
+	    send_command vdvDevice,"'REINIT'"
     }
 
     define_function long leftrotate(LONG lx, LONG ly)
     {
-	local_var long lRotate
-	lRotate=(lx << ly) BOR (lx >> (32-ly))
-	return lRotate
+        local_var long lRotate
+        lRotate=(lx << ly) BOR (lx >> (32-ly))
+        return lRotate
     }
 
     define_function MD5(CHAR cInputstring[256], CHAR cResult[32])
     {
-	local_var long lh0
-	local_var long lh1
-	local_var long lh2
-	local_var long lh3
+        local_var long lh0
+        local_var long lh1
+        local_var long lh2
+        local_var long lh3
+        
+        local_var long la
+        local_var long lb
+        local_var long lc
+        local_var long ld
+        
+        local_var integer nMessageLength 
+        
+        cText2 = cInputstring
+        
+        lh0 = $67452301
+        lh1 = $EFCDAB89
+        lh2 = $98BADCFE
+        lh3 = $10325476
+        
+        la = lh0
+        lb = lh1
+        lc = lh2
+        ld = lh3
+        
+        nMessageLength = length_string(cText2)*8	// Determinamos la lontigud del mensaje
+        cText2 = "cText2,$80" // Add 1 Bit (10000000)
 	
-	local_var long la
-	local_var long lb
-	local_var long lc
-	local_var long ld
+        while((length_string(cText2)%64)<>56)		// 0 Bits de relleno hasta 8 bytes de duraciï¿½n
+        {
+            cText2="cText2,$00"
+        }
 	
-	local_var integer nMessageLength 
+	    cText2="cText2,nMessageLength%256,nMessageLength/256,$00,$00,$00,$00,$00,$00"	// add message Length in little Endian
 	
-	cText2 = cInputstring
-	
-	lh0 = $67452301
-	lh1 = $EFCDAB89
-	lh2 = $98BADCFE
-	lh3 = $10325476
-	
-	la = lh0
-	lb = lh1
-	lc = lh2
-	ld = lh3
-	
-	nMessageLength = length_string(cText2)*8	// Determinamos la lontigud del mensaje
-	cText2 = "cText2,$80"				// Añadir 1 Bit (10000000)
-	
-	while((length_string(cText2)%64)<>56)		// 0 Bits de relleno hasta 8 bytes de duración
-	{
-	    cText2="cText2,$00"
-	}
-	
-	cText2="cText2,nMessageLength%256,nMessageLength/256,$00,$00,$00,$00,$00,$00"	// add message Length in little Endian
-	
-	while(length_string(cText2))
-	{
-	    local_var integer i
-	    local_var char cText3[64]			// 512 Bit Blocks
-	    local_var char cText4[16][4]		// 16 32 Bit Blocks
-	    local_var long lText4[16]			// 16 32 Bit Blocks
-	    
-	    local_var long lf
-	    local_var long lg
-	    local_var long ltemp
-	    
-	    cText3 = get_buffer_string(cText2,64)
-	    
-	    for(i=1;i<=16;i++)
-	    {
-		cText4[i] = get_buffer_string(cText3,4)
-		lText4[i] = (cText4[i][1])+(cText4[i][2]*256)+(cText4[i][3]*65536)+(cText4[i][4]*16777216)
-	    }
-	    
-	    for(i=0;i<=63;i++)
-	    {
-		select
-		{
-		    active(i<=15):
-		    {
-			lf=(lb BAND lc) BOR ((BNOT lb) BAND ld)
-			lg=i
-		    }
-		    active(i<=31):
-		    {
-			lf=(ld BAND lb) BOR ((BNOT ld) BAND lc)
-			lg=(5*i+1)%16
-		    }
-		    active(i<=47):
-		    {
-			lf=lb BXOR lc BXOR ld
-			lg=(3*i+5)%16
-		    }
-		    active(i<=63):
-		    {
-			lf=lc BXOR (lb BOR (BNOT ld))
-			lg=(7*i)%16
-		    }
-		}
-		
-		ltemp = ld
-		ld = lc
-		lc = lb
-		lb = lb + leftrotate((la+lf+lk[i+1]+lText4[lg+1]),lr[i+1])
-		la = ltemp
-	    }
-	    
-	    lh0 = lh0 + la
-	    lh1 = lh1 + lb
-	    lh2 = lh2 + lc
-	    lh3 = lh3 + ld
-	}
-	
-	cResult = "format('%02x',lh0%256),format('%02x',(lh0/256)%256),format('%02x',(lh0/65536)%256),format('%02x',lh0/16777216),
-		   format('%02x',lh1%256),format('%02x',(lh1/256)%256),format('%02x',(lh1/65536)%256),format('%02x',lh1/16777216),
-		   format('%02x',lh2%256),format('%02x',(lh2/256)%256),format('%02x',(lh2/65536)%256),format('%02x',lh2/16777216),
-		   format('%02x',lh3%256),format('%02x',(lh3/256)%256),format('%02x',(lh3/65536)%256),format('%02x',lh3/16777216)"
+        while(length_string(cText2))
+        {
+            local_var integer i
+            local_var char cText3[64]			// 512 Bit Blocks
+            local_var char cText4[16][4]		// 16 32 Bit Blocks
+            local_var long lText4[16]			// 16 32 Bit Blocks
+            
+            local_var long lf
+            local_var long lg
+            local_var long ltemp
+            
+            cText3 = get_buffer_string(cText2,64)
+            
+            for(i=1;i<=16;i++)
+            {
+                cText4[i] = get_buffer_string(cText3,4)
+                lText4[i] = (cText4[i][1])+(cText4[i][2]*256)+(cText4[i][3]*65536)+(cText4[i][4]*16777216)
+            }
+            
+            for(i=0;i<=63;i++)
+            {
+                select
+                {
+                    active(i<=15):
+                    {
+                    lf=(lb BAND lc) BOR ((BNOT lb) BAND ld)
+                    lg=i
+                    }
+                    active(i<=31):
+                    {
+                    lf=(ld BAND lb) BOR ((BNOT ld) BAND lc)
+                    lg=(5*i+1)%16
+                    }
+                    active(i<=47):
+                    {
+                    lf=lb BXOR lc BXOR ld
+                    lg=(3*i+5)%16
+                    }
+                    active(i<=63):
+                    {
+                    lf=lc BXOR (lb BOR (BNOT ld))
+                    lg=(7*i)%16
+                    }
+                }
+                
+                ltemp = ld
+                ld = lc
+                lc = lb
+                lb = lb + leftrotate((la+lf+lk[i+1]+lText4[lg+1]),lr[i+1])
+                la = ltemp
+            }
+            
+            lh0 = lh0 + la
+            lh1 = lh1 + lb
+            lh2 = lh2 + lc
+            lh3 = lh3 + ld
+        }
+        
+        cResult = "format('%02x',lh0%256),format('%02x',(lh0/256)%256),format('%02x',(lh0/65536)%256),format('%02x',lh0/16777216),
+                   format('%02x',lh1%256),format('%02x',(lh1/256)%256),format('%02x',(lh1/65536)%256),format('%02x',lh1/16777216),
+                   format('%02x',lh2%256),format('%02x',(lh2/256)%256),format('%02x',(lh2/65536)%256),format('%02x',lh2/16777216),
+                   format('%02x',lh3%256),format('%02x',(lh3/256)%256),format('%02x',(lh3/65536)%256),format('%02x',lh3/16777216)"
     }
 
     define_function char[32] fnDeviceToString(dev dvDev)
     {
-	stack_var char sDevice[32]
-	sDevice = "itoa(dvDev.NUMBER),':',itoa(dvDev.PORT),':',itoa(dvDev.SYSTEM)"
+        stack_var char sDevice[32]
+        sDevice = "itoa(dvDev.NUMBER),':',itoa(dvDev.PORT),':',itoa(dvDev.SYSTEM)"
 	
     }
 
     define_function fnInfo(char sInfo[])
     {
-	//send_string 0,"'DEBUG - ',sDebug"
-	amx_log(AMX_INFO,"__file__,': ',sInfo")
+        //send_string 0,"'DEBUG - ',sDebug"
+        amx_log(AMX_INFO,"__file__,': ',sInfo")
     }
 
     define_function fnDebug(char sDebug[])
     {
-	//send_string 0,"'DEBUG - ',sDebug"
-	amx_log(AMX_DEBUG,"__file__,': ',sDebug")
+    	//send_string 0,"'DEBUG - ',sDebug"
+    	amx_log(AMX_DEBUG,"__file__,': ',sDebug")
     }
 
     define_function fnDebugIntoHex(char sDebug[])
     {
-	stack_var integer i
-	stack_var char sDebugAux[255]
-	for(i=1;i<=length_string(sDebug);i++)
-	{
-	    sDebugAux = "sDebugAux,itohex(sDebug[i]),' '"
-	}	
-	amx_log(AMX_DEBUG,"__file__,': ',sDebugAux")
-	//send_string 0,"'DEBUG - ',sDebugAux"
+        stack_var integer i
+        stack_var char sDebugAux[255]
+        for(i=1;i<=length_string(sDebug);i++)
+        {
+            sDebugAux = "sDebugAux,itohex(sDebug[i]),' '"
+        }	
+        amx_log(AMX_DEBUG,"__file__,': ',sDebugAux")
+        //send_string 0,"'DEBUG - ',sDebugAux"
     }
 
     define_function fnLog(char sData[])
     {
-	stack_var slong sResult,nHandlerFile 
-	nHandlerFile = -1
-	nHandlerFile = file_open('log.txt',FILE_RW_APPEND)	
-	if(nHandlerFile)
-	{
-	    fnDebug('LOG: File opened correctly')
-	    sResult = file_write_line(nHandlerFile,"time,': ',sData",100)
-	    if(sResult) {fnDebug('LOG: data stored correctly')}
-	    else			{fnDebug('LOG: problem writting on file!')}
-	    file_close(nHandlerFile)
-	}
+        stack_var slong sResult,nHandlerFile 
+        nHandlerFile = -1
+        nHandlerFile = file_open('log.txt',FILE_RW_APPEND)	
+        if(nHandlerFile)
+        {
+            fnDebug('LOG: File opened correctly')
+            sResult = file_write_line(nHandlerFile,"time,': ',sData",100)
+            if(sResult) {fnDebug('LOG: data stored correctly')}
+            else			{fnDebug('LOG: problem writting on file!')}
+            file_close(nHandlerFile)
+        }
     }
 	
     define_function fnBeep(dev dvTp)
     {
-	send_command dvTp,'ABEEP'
+	    send_command dvTp,'ABEEP'
     }
 
     define_function fnDoubleBeep(dev dvTp)
     {
-	send_command dvTp,'ADBEEP'
+	    send_command dvTp,'ADBEEP'
     }
 	
     define_function fnPageOpen(dev dvTp,char sPage[])
     {
-	send_command dvTp,"'PAGE-',sPage"
+    	send_command dvTp,"'PAGE-',sPage"
     }
 
     define_function fnPopupOpen(dev dvTp,char sPopup[])
     {
-	send_command dvTp,"'PPON-',sPopup"
+	    send_command dvTp,"'PPON-',sPopup"
     }
 
     define_function fnPopupClose(dev dvTp,char sPopup[])
     {
-	send_command dvTp,"'PPOF-',sPopup"
+	    send_command dvTp,"'PPOF-',sPopup"
     }
 
     define_function fnPopupCloseAll(dev dvTp)
     {
-	send_command dvTp,"'@PPX'"
+	    send_command dvTp,"'@PPX'"
     }
 
     define_function fnSubPageOpen(dev dvTp,integer nAddressCode,char sSubpage[])
     {
-	send_command dvTp,"'^SSH-',itoa(nAddressCode),',',sSubpage"
+	    send_command dvTp,"'^SSH-',itoa(nAddressCode),',',sSubpage"
     }
 
     define_function fnSubPageClose(dev dvTp,integer nAddressCode,char sSubpage[])
     {
-	send_command dvTp,"'^SHD-',itoa(nAddressCode),',',sSubpage"
+    	send_command dvTp,"'^SHD-',itoa(nAddressCode),',',sSubpage"
     }
 
     define_function fnTextChange(dev dvTp,integer nTxt,char sText[])
     {
-	send_command dvTp,"'^TXT-',itoa(nTxt),',0,',sText"
+	    send_command dvTp,"'^TXT-',itoa(nTxt),',0,',sText"
     }
 
     define_function fnTextChangeUTF(dev dvTp,integer nTxt,char sText[])
     {
-	send_command dvTp,"'^UTF-',itoa(nTxt),',0,',sText"
+	    send_command dvTp,"'^UTF-',itoa(nTxt),',0,',sText"
     }
 
     define_function fnTextChangeRange(dev dvTp,integer nStart,integer nEnd,char sText[])
     {
-	send_command dvTp,"'^TXT-',itoa(nStart),'.',itoa(nEnd),',0,',sText"
+	    send_command dvTp,"'^TXT-',itoa(nStart),'.',itoa(nEnd),',0,',sText"
     }
 
     define_function fnTextJustification(dev dvTp,integer nTxt,integer nStates,integer nJustification)
     {
-	send_command dvTp,"'^JST-',itoa(nTxt),',',itoa(nStates),',',itoa(nJustification)"
+	    send_command dvTp,"'^JST-',itoa(nTxt),',',itoa(nStates),',',itoa(nJustification)"
     }
 
     define_function fnButtonSetImg(dev dvTp,integer nAddress,char sImgName[])
     {
-	send_command dvTp,"'^BMP-',itoa(nAddress),',0,',sImgName,',,10'"
+	    send_command dvTp,"'^BMP-',itoa(nAddress),',0,',sImgName,',,10'"
     }
 
     define_function fnButtonHide(dev dvTp,integer nTxt)
     {
-	send_command dvTp,"'^SHO-',itoa(nTxt),',0'"
+	    send_command dvTp,"'^SHO-',itoa(nTxt),',0'"
     }
 
     define_function fnButtonHideRange(dev dvTp,integer nStart,integer nEnd)
     {
-	send_command dvTp,"'^SHO-',itoa(nStart),'.',itoa(nEnd),',0'"
+	    send_command dvTp,"'^SHO-',itoa(nStart),'.',itoa(nEnd),',0'"
     }
 
     define_function fnButtonShow(dev dvTp,integer nTxt)
     {
-	send_command dvTp,"'^SHO-',itoa(nTxt),',1'"
+	    send_command dvTp,"'^SHO-',itoa(nTxt),',1'"
     }
 
     define_function fnButtonShowRange(dev dvTp,integer nStart,integer nEnd)
     {
-	send_command dvTp,"'^SHO-',itoa(nStart),'.',itoa(nEnd),',1'"
+	    send_command dvTp,"'^SHO-',itoa(nStart),'.',itoa(nEnd),',1'"
     }
 
     define_function fnButtonEnable(dev dvTp,integer nTxt)
     {
-	send_command dvTp,"'^ENA-',itoa(nTxt),',1'"
+	    send_command dvTp,"'^ENA-',itoa(nTxt),',1'"
     }
 
     define_function fnButtonDisable(dev dvTp,integer nTxt)
     {
-	send_command dvTp,"'^ENA-',itoa(nTxt),',0'"
+	    send_command dvTp,"'^ENA-',itoa(nTxt),',0'"
     }
 
     define_function fnLevelChange(dev dvTp,integer nLvl,integer nValue)
     {
-	send_level dvTp,nLvl,nValue
+	    send_level dvTp,nLvl,nValue
     }
 
     define_function char[8] fnSplitIntoMinutesAndSeconds(char sSeconds[], char sSeperator[])
     {
-	stack_var integer nMinutes, nSeconds, nSecondsPassByReference, nSecondsforMath
-	stack_var char sReturnString[8]
-	
-	nSecondsPassByReference = atoi(sSeconds)
-	nSecondsforMath = nSecondsPassByReference
-	nMinutes = nSecondsforMath / 60
-	nSecondsPassByReference = nSecondsforMath % 60
-	
-	if(nSecondsPassByReference < 10)
-	{
-	    //nSeconds needs a '0' in front, looks neater
-	    sReturnString = "itoa(nMinutes),sSeperator,'0',itoa(nSecondsPassByReference)"
-	    
-	    if(nMinutes < 10)
-	    {
-		//nMinutes needs a '0' in front, looks neater
-		sReturnString = "'0',itoa(nMinutes),sSeperator,'0',itoa(nSecondsPassByReference)"
-	    }
-	}
-	else
-	{
-	    //nSeconds does not require a '0' in front...
-	    sReturnString = "itoa(nMinutes),sSeperator,itoa(nSecondsPassByReference)"
-	    
-	    if(nMinutes < 10)
-	    {
-		//nMinutes needs a '0' in front, looks neater
-		sReturnString = "'0',itoa(nMinutes),sSeperator,itoa(nSecondsPassByReference)"
-	    }
-	}
-	
-	return sReturnString
+        stack_var integer nMinutes, nSeconds, nSecondsPassByReference, nSecondsforMath
+        stack_var char sReturnString[8]
+        
+        nSecondsPassByReference = atoi(sSeconds)
+        nSecondsforMath = nSecondsPassByReference
+        nMinutes = nSecondsforMath / 60
+        nSecondsPassByReference = nSecondsforMath % 60
+        
+        if(nSecondsPassByReference < 10)
+        {
+            //nSeconds needs a '0' in front, looks neater
+            sReturnString = "itoa(nMinutes),sSeperator,'0',itoa(nSecondsPassByReference)"
+            
+            if(nMinutes < 10)
+            {
+            //nMinutes needs a '0' in front, looks neater
+            sReturnString = "'0',itoa(nMinutes),sSeperator,'0',itoa(nSecondsPassByReference)"
+            }
+        }
+        else
+        {
+            //nSeconds does not require a '0' in front...
+            sReturnString = "itoa(nMinutes),sSeperator,itoa(nSecondsPassByReference)"
+            
+            if(nMinutes < 10)
+            {
+            //nMinutes needs a '0' in front, looks neater
+            sReturnString = "'0',itoa(nMinutes),sSeperator,itoa(nSecondsPassByReference)"
+            }
+        }
+        
+        return sReturnString
     }
 
     define_function char[8] fnSplitIntoMinutesOnly(integer nSeconds)
     {
-	stack_var integer nMinutes, nSecondsPassByReference, nSecondsforMath
-	stack_var char sReturnString[8]
-	
-	nSecondsPassByReference = nSeconds;
-	nSecondsforMath = nSecondsPassByReference;
-	nMinutes = nSecondsforMath/60;
-	sReturnString = "itoa(nMinutes)";
-	
-	return sReturnString
+        stack_var integer nMinutes, nSecondsPassByReference, nSecondsforMath
+        stack_var char sReturnString[8]
+        
+        nSecondsPassByReference = nSeconds;
+        nSecondsforMath = nSecondsPassByReference;
+        nMinutes = nSecondsforMath/60;
+        sReturnString = "itoa(nMinutes)";
+        
+        return sReturnString
     }
 
     define_function char[100] fnGetIPErrorDescription(long nError)
     {
-	stack_var char sReturn[100]
-	sReturn = "'IP ERROR ',itoa(nError),': '"
-	
-	switch(nError)
-	{
-	    case 2:  {sReturn = "sReturn,'General Failure (IP_CLIENT_OPEN/IP_SERVER_OPEN)'"}
-	    case 4:  {sReturn = "sReturn,'Uknown host or DNS error (IP_CLIENT_OPEN)'"}
-	    case 6:  {sReturn = "sReturn,'connection refused (IP_CLIENT_OPEN)'"}
-	    case 7:  {sReturn = "sReturn,'connection timed out (IP_CLIENT_OPEN)'"}
-	    case 8:  {sReturn = "sReturn,'unknown connection error (IP_CLIENT_OPEN)'"}
-	    case 9:  {sReturn = "sReturn,'Already closed (IP_CLIENT_CLOSE/IP_SERVER_CLOSE)'"}
-	    case 10: {sReturn = "sReturn,'Binding error (IP_SERVER_OPEN)'"}
-	    case 11: {sReturn = "sReturn,'Listening error (IP_SERVER_OPEN)'"}
-	    case 14: {sReturn = "sReturn,'local port already used (IP_CLIENT_OPEN/IP_SERVER_OPEN)'"}
-	    case 15: {sReturn = "sReturn,'UDP socket already listening (IP_SERVER_OPEN)'"}
-	    case 16: {sReturn = "sReturn,'too many open sockets (IP_CLIENT_OPEN/IP_SERVER_OPEN)'"}
-	    case 17: {sReturn = "sReturn,'Local port not open, can not send string (IP_CLIENT_OPEN)'"}
-	    default: {sReturn = "sReturn,'Uknown error'"}
-	}
-	return sReturn
+        stack_var char sReturn[100]
+        sReturn = "'IP ERROR ',itoa(nError),': '"
+        
+        switch(nError)
+        {
+            case 2:  {sReturn = "sReturn,'General Failure (IP_CLIENT_OPEN/IP_SERVER_OPEN)'"}
+            case 4:  {sReturn = "sReturn,'Uknown host or DNS error (IP_CLIENT_OPEN)'"}
+            case 6:  {sReturn = "sReturn,'connection refused (IP_CLIENT_OPEN)'"}
+            case 7:  {sReturn = "sReturn,'connection timed out (IP_CLIENT_OPEN)'"}
+            case 8:  {sReturn = "sReturn,'unknown connection error (IP_CLIENT_OPEN)'"}
+            case 9:  {sReturn = "sReturn,'Already closed (IP_CLIENT_CLOSE/IP_SERVER_CLOSE)'"}
+            case 10: {sReturn = "sReturn,'Binding error (IP_SERVER_OPEN)'"}
+            case 11: {sReturn = "sReturn,'Listening error (IP_SERVER_OPEN)'"}
+            case 14: {sReturn = "sReturn,'local port already used (IP_CLIENT_OPEN/IP_SERVER_OPEN)'"}
+            case 15: {sReturn = "sReturn,'UDP socket already listening (IP_SERVER_OPEN)'"}
+            case 16: {sReturn = "sReturn,'too many open sockets (IP_CLIENT_OPEN/IP_SERVER_OPEN)'"}
+            case 17: {sReturn = "sReturn,'Local port not open, can not send string (IP_CLIENT_OPEN)'"}
+            default: {sReturn = "sReturn,'Uknown error'"}
+        }
+        return sReturn
     }
 
     define_function integer fnIsLeapYear(integer nYear)
@@ -434,41 +434,41 @@ DEFINE_START
 
     define_function sinteger fnDateCompare(char sDate1[],char sDate2[])
     {
-	stack_var char sF1[8],sF2[8] 
-	sF1 = "'20',mid_string(sDate1,7,2),mid_string(sDate1,1,2),mid_string(sDate1,4,2)"
-	sF2 = "'20',mid_string(sDate2,7,2),mid_string(sDate2,1,2),mid_string(sDate2,4,2)"
-	
-	if (sF1 > sF2) return 1
-	if (sF1 < sF2) return (-1)   
-	return 0
+        stack_var char sF1[8],sF2[8] 
+        sF1 = "'20',mid_string(sDate1,7,2),mid_string(sDate1,1,2),mid_string(sDate1,4,2)"
+        sF2 = "'20',mid_string(sDate2,7,2),mid_string(sDate2,1,2),mid_string(sDate2,4,2)"
+        
+        if (sF1 > sF2) return 1
+        if (sF1 < sF2) return (-1)   
+        return 0
     }
 
     define_function integer fnLoByte(integer LI_WORD)
     {
-	// Devuelve el LSB
-	return LI_WORD%$100
+        // Devuelve el LSB
+        return LI_WORD%$100
     }
 
     define_function integer fnHiByte(integer LI_WORD)
     {
-	// Devuelve el MSB
-	return LI_WORD/$100
+        // Devuelve el MSB
+        return LI_WORD/$100
     }
 
     define_function char fnChecksum(char sData[])
     {
-	stack_var char cSum
-	stack_var integer i
-	for(i=1;i<=max_length_array(sData);i++)
-	{
-	    cSum = cSum + sData[i]
-	}
-	
-	return cSum
+        stack_var char cSum
+        stack_var integer i
+        for(i=1;i<=max_length_array(sData);i++)
+        {
+            cSum = cSum + sData[i]
+        }
+        
+        return cSum
     }
 
 #END_IF // __CUSTOMAPI__
 
-(***********************************************************)
+(*******************************************)
 (*		    	END OF PROGRAM			   *)
-(***********************************************************) 
+(*******************************************) 
