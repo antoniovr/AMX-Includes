@@ -2,7 +2,7 @@
 (***********************************************************)
 (*  FILE CREATED ON: 10/14/2019  AT: 22:07:07              *)
 (***********************************************************)
-(*  FILE_LAST_MODIFIED_ON: 11/19/2020  AT: 12:13:34        *)
+(*  FILE_LAST_MODIFIED_ON: 12/21/2020  AT: 11:39:41        *)
 (***********************************************************)
 
 #include 'SwitcherInOut'
@@ -126,7 +126,7 @@ DEFINE_START
         {
             stack_var integer i
             stack_var integer j
-            for(i=1;i<=max_length_array(anMicStatus[_MAX_UNITS])-1;i++)
+            for(i=1;i<=max_length_array(anMicStatus[_MAX_UNITS]);i++)
             {
             if(anMicStatusAux[i] != anMicStatus[i])
             {
