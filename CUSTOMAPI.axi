@@ -1,6 +1,6 @@
 PROGRAM_NAME='CUSTOMAPI'
 (***********************************************************)
-(*  FILE_LAST_MODIFIED_ON: 08/20/2020  AT: 11:29:40        *)
+(*  FILE_LAST_MODIFIED_ON: 03/17/2021  AT: 10:02:45        *)
 (***********************************************************)
 
 #IF_NOT_DEFINED __CUSTOMAPI__
@@ -88,17 +88,17 @@ DEFINE_START
 
     define_function fnModuleSetIP(dev vdvDevice,char sIP[])
     {
-	    send_command vdvDevice,"'PROPERTY-IP_Address,',sIP"
+	send_command vdvDevice,"'PROPERTY-IP_Address,',sIP"
     }
     
     define_function fnModuleSetPort(dev vdvDevice,long nPort)
     {
-	    send_command vdvDevice,"'PROPERTY-Port,',itoa(nPort)"
+	send_command vdvDevice,"'PROPERTY-Port,',itoa(nPort)"
     }
     
     define_function fnModuleReinit(dev vdvDevice)
     {
-	    send_command vdvDevice,"'REINIT'"
+	send_command vdvDevice,"'REINIT'"
     }
 
     define_function long leftrotate(LONG lx, LONG ly)
@@ -217,14 +217,16 @@ DEFINE_START
 
     define_function fnInfo(char sInfo[])
     {
-        //send_string 0,"'DEBUG - ',sDebug"
-        amx_log(AMX_INFO,"__file__,': ',sInfo")
+        send_string 0,"'DEBUG - ',sInfo"
+	// Only for NX controllers:
+        //amx_log(AMX_INFO,"__file__,': ',sInfo")
     }
 
     define_function fnDebug(char sDebug[])
     {
-    	//send_string 0,"'DEBUG - ',sDebug"
-    	amx_log(AMX_DEBUG,"__file__,': ',sDebug")
+    	send_string 0,"'DEBUG - ',sDebug"
+	// Only for NX controllers:
+    	//amx_log(AMX_DEBUG,"__file__,': ',sDebug")
     }
 
     define_function fnDebugIntoHex(char sDebug[])
@@ -256,12 +258,12 @@ DEFINE_START
 	
     define_function fnBeep(dev dvTp)
     {
-	    send_command dvTp,'ABEEP'
+	send_command dvTp,'ABEEP'
     }
 
     define_function fnDoubleBeep(dev dvTp)
     {
-	    send_command dvTp,'ADBEEP'
+	send_command dvTp,'ADBEEP'
     }
 	
     define_function fnPageOpen(dev dvTp,char sPage[])
@@ -271,22 +273,22 @@ DEFINE_START
 
     define_function fnPopupOpen(dev dvTp,char sPopup[])
     {
-	    send_command dvTp,"'PPON-',sPopup"
+	send_command dvTp,"'PPON-',sPopup"
     }
 
     define_function fnPopupClose(dev dvTp,char sPopup[])
     {
-	    send_command dvTp,"'PPOF-',sPopup"
+	send_command dvTp,"'PPOF-',sPopup"
     }
 
     define_function fnPopupCloseAll(dev dvTp)
     {
-	    send_command dvTp,"'@PPX'"
+	send_command dvTp,"'@PPX'"
     }
 
     define_function fnSubPageOpen(dev dvTp,integer nAddressCode,char sSubpage[])
     {
-	    send_command dvTp,"'^SSH-',itoa(nAddressCode),',',sSubpage"
+	send_command dvTp,"'^SSH-',itoa(nAddressCode),',',sSubpage"
     }
 
     define_function fnSubPageClose(dev dvTp,integer nAddressCode,char sSubpage[])
@@ -296,62 +298,62 @@ DEFINE_START
 
     define_function fnTextChange(dev dvTp,integer nTxt,char sText[])
     {
-	    send_command dvTp,"'^TXT-',itoa(nTxt),',0,',sText"
+	send_command dvTp,"'^TXT-',itoa(nTxt),',0,',sText"
     }
 
     define_function fnTextChangeUTF(dev dvTp,integer nTxt,char sText[])
     {
-	    send_command dvTp,"'^UTF-',itoa(nTxt),',0,',sText"
+	send_command dvTp,"'^UTF-',itoa(nTxt),',0,',sText"
     }
 
     define_function fnTextChangeRange(dev dvTp,integer nStart,integer nEnd,char sText[])
     {
-	    send_command dvTp,"'^TXT-',itoa(nStart),'.',itoa(nEnd),',0,',sText"
+	send_command dvTp,"'^TXT-',itoa(nStart),'.',itoa(nEnd),',0,',sText"
     }
 
     define_function fnTextJustification(dev dvTp,integer nTxt,integer nStates,integer nJustification)
     {
-	    send_command dvTp,"'^JST-',itoa(nTxt),',',itoa(nStates),',',itoa(nJustification)"
+	send_command dvTp,"'^JST-',itoa(nTxt),',',itoa(nStates),',',itoa(nJustification)"
     }
 
     define_function fnButtonSetImg(dev dvTp,integer nAddress,char sImgName[])
     {
-	    send_command dvTp,"'^BMP-',itoa(nAddress),',0,',sImgName,',,10'"
+	send_command dvTp,"'^BMP-',itoa(nAddress),',0,',sImgName,',,10'"
     }
 
     define_function fnButtonHide(dev dvTp,integer nTxt)
     {
-	    send_command dvTp,"'^SHO-',itoa(nTxt),',0'"
+	send_command dvTp,"'^SHO-',itoa(nTxt),',0'"
     }
 
     define_function fnButtonHideRange(dev dvTp,integer nStart,integer nEnd)
     {
-	    send_command dvTp,"'^SHO-',itoa(nStart),'.',itoa(nEnd),',0'"
+	send_command dvTp,"'^SHO-',itoa(nStart),'.',itoa(nEnd),',0'"
     }
 
     define_function fnButtonShow(dev dvTp,integer nTxt)
     {
-	    send_command dvTp,"'^SHO-',itoa(nTxt),',1'"
+	send_command dvTp,"'^SHO-',itoa(nTxt),',1'"
     }
 
     define_function fnButtonShowRange(dev dvTp,integer nStart,integer nEnd)
     {
-	    send_command dvTp,"'^SHO-',itoa(nStart),'.',itoa(nEnd),',1'"
+	send_command dvTp,"'^SHO-',itoa(nStart),'.',itoa(nEnd),',1'"
     }
 
     define_function fnButtonEnable(dev dvTp,integer nTxt)
     {
-	    send_command dvTp,"'^ENA-',itoa(nTxt),',1'"
+	send_command dvTp,"'^ENA-',itoa(nTxt),',1'"
     }
 
     define_function fnButtonDisable(dev dvTp,integer nTxt)
     {
-	    send_command dvTp,"'^ENA-',itoa(nTxt),',0'"
+	send_command dvTp,"'^ENA-',itoa(nTxt),',0'"
     }
 
     define_function fnLevelChange(dev dvTp,integer nLvl,integer nValue)
     {
-	    send_level dvTp,nLvl,nValue
+	send_level dvTp,nLvl,nValue
     }
 
     define_function char[8] fnSplitIntoMinutesAndSeconds(char sSeconds[], char sSeperator[])
@@ -469,6 +471,6 @@ DEFINE_START
 
 #END_IF // __CUSTOMAPI__
 
-(*******************************************)
-(*		    	END OF PROGRAM			   *)
-(*******************************************) 
+(********************************************)
+(*             END OF PROGRAM               *)
+(********************************************) 
