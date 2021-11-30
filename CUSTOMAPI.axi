@@ -1,6 +1,6 @@
 PROGRAM_NAME='CUSTOMAPI'
 (***********************************************************)
-(*  FILE_LAST_MODIFIED_ON: 03/17/2021  AT: 10:02:45        *)
+(*  FILE_LAST_MODIFIED_ON: 11/16/2021  AT: 16:31:34        *)
 (***********************************************************)
 
 #IF_NOT_DEFINED __CUSTOMAPI__
@@ -169,23 +169,23 @@ DEFINE_START
                 {
                     active(i<=15):
                     {
-                    lf=(lb BAND lc) BOR ((BNOT lb) BAND ld)
-                    lg=i
+                        lf=(lb BAND lc) BOR ((BNOT lb) BAND ld)
+                        lg=i
                     }
                     active(i<=31):
                     {
-                    lf=(ld BAND lb) BOR ((BNOT ld) BAND lc)
-                    lg=(5*i+1)%16
+                        lf=(ld BAND lb) BOR ((BNOT ld) BAND lc)
+                        lg=(5*i+1)%16
                     }
                     active(i<=47):
                     {
-                    lf=lb BXOR lc BXOR ld
-                    lg=(3*i+5)%16
+                        lf=lb BXOR lc BXOR ld
+                        lg=(3*i+5)%16
                     }
                     active(i<=63):
                     {
-                    lf=lc BXOR (lb BOR (BNOT ld))
-                    lg=(7*i)%16
+                        lf=lc BXOR (lb BOR (BNOT ld))
+                        lg=(7*i)%16
                     }
                 }
                 
@@ -217,16 +217,16 @@ DEFINE_START
 
     define_function fnInfo(char sInfo[])
     {
-        send_string 0,"'DEBUG - ',sInfo"
+        //send_string 0,"'DEBUG - ',sInfo"
 	// Only for NX controllers:
-        //amx_log(AMX_INFO,"__file__,': ',sInfo")
+        amx_log(AMX_INFO,"__file__,': ',sInfo")
     }
 
     define_function fnDebug(char sDebug[])
     {
-    	send_string 0,"'DEBUG - ',sDebug"
+    	//send_string 0,"'DEBUG - ',sDebug"
 	// Only for NX controllers:
-    	//amx_log(AMX_DEBUG,"__file__,': ',sDebug")
+    	amx_log(AMX_DEBUG,"__file__,': ',sDebug")
     }
 
     define_function fnDebugIntoHex(char sDebug[])
@@ -468,6 +468,17 @@ DEFINE_START
         
         return cSum
     }
+    
+    define_function integer fnChecksumXOR(char sData[])
+    {
+        stack_var integer i
+        stack_var integer nChecksum
+        for(i=1;i<=length_string(sData);i++)
+        {
+            nChecksum = nChecksum ^ sData[i]
+        }
+        return nChecksum
+    }    
 
 #END_IF // __CUSTOMAPI__
 

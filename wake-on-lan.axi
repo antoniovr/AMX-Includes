@@ -1,6 +1,6 @@
 program_name='wake-on-lan'
 (***********************************************************)
-(*  FILE_LAST_MODIFIED_ON: 03/15/2021  AT: 08:00:23        *)
+(*  FILE_LAST_MODIFIED_ON: 07/19/2021  AT: 10:39:38        *)
 (***********************************************************)
 
 #if_not_defined __WAKE_ON_LAN__
@@ -16,7 +16,7 @@ DEFINE_DEVICE
 
     #warn 'Wake-on-lan: Define the IP socket in the main program or leave it this way (0:15:0)'
     #if_not_defined dvIpSocketWakeOnLan
-	dvIpSocketWakeOnLan = 0:15:0
+        dvIpSocketWakeOnLan = 0:15:0
     #end_if
 
 /*
@@ -73,7 +73,7 @@ define_function fnWakeOnLan(char macAddress[])
     
     for (i = 1; i <= 16; i++)
     {
-	wakeOnLanMagicPacket = "wakeOnLanMagicPacket,macAddress"
+        wakeOnLanMagicPacket = "wakeOnLanMagicPacket,macAddress"
     }
     
     ip_client_open (dvIpSocketWakeOnLan.port, WAKE_ON_LAN_BROADCAST_ADDRESS, WAKE_ON_LAN_UDP_LISTENING_PORT, IP_UDP)
@@ -100,7 +100,7 @@ define_function wakeOnLanSpecifyBroadcastAddress (char macAddress[], char broadc
     
     for (i = 1; i <= 16; i++)
     {
-	wakeOnLanMagicPacket = "wakeOnLanMagicPacket,macAddress"
+        wakeOnLanMagicPacket = "wakeOnLanMagicPacket,macAddress"
     }
     
     ip_client_open (dvIpSocketWakeOnLan.port, broadcastAddress, WAKE_ON_LAN_UDP_LISTENING_PORT, IP_UDP)
@@ -113,4 +113,4 @@ define_function wakeOnLanSpecifyBroadcastAddress (char macAddress[], char broadc
 
 (********************************************)
 (*             END OF PROGRAM               *)
-(********************************************) 
+(********************************************)
